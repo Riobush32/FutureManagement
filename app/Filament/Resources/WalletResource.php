@@ -20,7 +20,7 @@ class WalletResource extends Resource
     protected static ?string $model = Wallet::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-wallet';
-    protected static ?string $navigationGroup = 'Finance';
+    protected static ?string $navigationGroup = 'Finance Management';
 
     public static function form(Form $form): Form
     {
@@ -41,17 +41,17 @@ class WalletResource extends Resource
                 JSMoneyInput::make('admin_fee')
                     ->label('Admin Fee')
                     ->prefix('Rp')
-                    ->currency('IDR') // ISO 4217 Currency Code, example: USD
+                    ->currency('IDR')
                     ->locale('id-ID')
-                    ->default(0) // nilai default jika kosong
-                    ->dehydrateStateUsing(fn($state) => $state ?? 0) // pastikan tetap 0 saat disimpan jika null
-                    ->required(false), // BCP 47 Locale Code, example: en-US
+                    ->default(0)
+                    ->required(),
 
                 JSMoneyInput::make('balance')
                     ->label('Balance')
                     ->prefix('Rp')
                     ->currency('IDR') // ISO 4217 Currency Code, example: USD
-                    ->locale('id-ID'), // BCP 47 Locale Code, example: en-US
+                    ->locale('id-ID')
+                    ->required(), // BCP 47 Locale Code, example: en-US
 
 
                 Forms\Components\Select::make('status')
@@ -83,6 +83,11 @@ class WalletResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->label('Type'),
+                Tables\Columns\TextColumn::make('balance')
+                    ->formatStateUsing(fn($state) => (float) ($state ?? 0))
+                    ->money('IDR')
+                    ->sortable()
+                    ->label('Balance'),
                 Tables\Columns\TextColumn::make('currency')
                     ->formatStateUsing(fn($state) => (float) ($state ?? 0))
                     ->money('IDR')
