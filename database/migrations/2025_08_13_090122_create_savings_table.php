@@ -11,19 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transactions', function (Blueprint $table) {
+        Schema::create('savings', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
             $table->foreignId('user_id')->constrained(
                 table: 'users',
-                indexName: 'user_transactions',
+                indexName: 'user_savings',
             )->onDelete('cascade');
-            $table->foreignId('category_id')->nullable()->constrained(
-                table: 'categories',
-                indexName: 'category_transactions',
-            )->nullOnDelete();
+            $table->foreignId('wallet_id')->constrained(
+                table: 'wallets',
+                indexName: 'wallet_savings',
+            )->onDelete('cascade');
+            $table->double('amount')->default(0);
+            $table->date('saving_date')->nullable();
+            $table->enum('type', ['gold', 'money'])->default('money');
             $table->text('description')->nullable();
-            $table->double('amount')->default(0.00);
-            $table->date('transaction_date')->nullable();
             $table->timestamps();
         });
     }
@@ -33,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('savings');
     }
 };

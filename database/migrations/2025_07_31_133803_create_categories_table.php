@@ -21,6 +21,10 @@ return new class extends Migration
                 table: 'categories',
                 indexName: 'parent_categories_index',
             )->onDelete('cascade');
+            $table->foreignId('budget_id')->nullable()->constrained(
+                table: 'budgets',
+                indexName: 'budget_category_index',
+            )->onDelete('cascade');
             $table->string('name');
             $table->string('type');
             $table->integer('level')->default(0);

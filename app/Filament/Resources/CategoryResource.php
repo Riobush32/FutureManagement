@@ -31,6 +31,13 @@ class CategoryResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->label('Category Name'),
+                Forms\Components\Select::make('budget_id')
+                    ->label('From Budget')
+                    ->relationship('budget', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->reactive()
+                    ->required(),
                 Forms\Components\Select::make('parent_id')
                     ->label('Induk Kategori')
                     ->relationship('parent', 'name')

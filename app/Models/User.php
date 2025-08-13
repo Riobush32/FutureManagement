@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Budget;
+use App\Models\Saving;
 use App\Models\Wallet;
 use App\Models\Category;
 use App\Models\Transaction;
@@ -69,5 +70,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Transaction::class);
     }
-    
+
+    public function savings(): HasMany
+    {
+        return $this->hasMany(Saving::class);
+    }
 }

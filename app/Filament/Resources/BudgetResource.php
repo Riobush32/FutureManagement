@@ -27,51 +27,51 @@ class BudgetResource extends Resource
     {
         return $form
             ->schema([
-            Forms\Components\Hidden::make('user_id')
-                ->default(Auth::user()->id),
+                Forms\Components\Hidden::make('user_id')
+                    ->default(Auth::user()->id),
 
-            Forms\Components\TextInput::make('name')
-                ->required()
-                ->label('Budget Name'),
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->label('Budget Name'),
 
-            Forms\Components\Select::make('wallet_id')
-                ->relationship('wallet', 'name')
-                ->required()
-                ->label('From wallet'),
+                Forms\Components\Select::make('wallet_id')
+                    ->relationship('wallet', 'name')
+                    ->required()
+                    ->label('From wallet'),
 
-            JSMoneyInput::make('amount')
-                ->label('Budget Amount')
-                ->prefix('Rp')
-                ->currency('IDR')
-                ->locale('id-ID')
-                ->default(0)
-                ->required()
-                ->formatStateUsing(function ($state) {
-                    // Jika null atau kosong, set ke 0.00
-                    if (is_null($state) || $state === '') {
-                        return 0.00;
-                    }
+                JSMoneyInput::make('amount')
+                    ->label('Budget Amount')
+                    ->prefix('Rp')
+                    ->currency('IDR')
+                    ->locale('id-ID')
+                    ->default(0)
+                    ->required()
+                    ->formatStateUsing(function ($state) {
+                        // Jika null atau kosong, set ke 0.00
+                        if (is_null($state) || $state === '') {
+                            return 0.00;
+                        }
 
-                    // Jika state adalah string (misalnya "500000"), ubah ke float dengan dua angka desimal
-                    return number_format(floatval(str_replace(['.', ','], ['', '.'], $state)), 2, '.', '');
-                }),
+                        // Jika state adalah string (misalnya "500000"), ubah ke float dengan dua angka desimal
+                        return number_format(floatval(str_replace(['.', ','], ['', '.'], $state)), 2, '.', '');
+                    }),
 
-            Forms\Components\DatePicker::make('start_date')
-                ->displayFormat('d/m/Y')
-                ->required(),
+                Forms\Components\DatePicker::make('start_date')
+                    ->displayFormat('d/m/Y')
+                    ->required(),
 
-            Forms\Components\DatePicker::make('end_date')
-                ->displayFormat('d/m/Y')
-                ->required(),
+                Forms\Components\DatePicker::make('end_date')
+                    ->displayFormat('d/m/Y')
+                    ->required(),
 
-            Forms\Components\Select::make('status')
-                ->options([
-                    'active' => 'Active',
-                    'inactive' => 'Inactive',
-                    'finish' => 'Finish',
-                ])
-                ->default('active')
-                ->required(),
+                Forms\Components\Select::make('status')
+                    ->options([
+                        'active' => 'Active',
+                        'inactive' => 'Inactive',
+                        'finish' => 'Finish',
+                    ])
+                    ->default('active')
+                    ->required(),
             ]);
     }
 
@@ -85,6 +85,14 @@ class BudgetResource extends Resource
                 Tables\Columns\TextColumn::make('amount')
                     ->money('IDR')
                     ->label('Budget Amount'),
+
+                Tables\Columns\TextColumn::make('used_budget')
+                    ->label('Budget Used')
+                    ->money('IDR'), // Jika ingin tampil sebagai uang
+
+                Tables\Columns\TextColumn::make('remaining_budget')
+                    ->label('Remaining Budget')
+                    ->money('IDR'),
 
                 Tables\Columns\TextColumn::make('start_date')
                     ->date()

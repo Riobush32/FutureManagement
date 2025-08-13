@@ -9,6 +9,7 @@ use Filament\Tables\Table;
 use App\Models\Transaction;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\TransactionResource\Pages;
@@ -28,24 +29,18 @@ class TransactionResource extends Resource
                 Forms\Components\Hidden::make('user_id')
                     ->default(Auth::user()->id),
 
-                Forms\Components\Select::make('budget_id')
-                    ->relationship('budget', 'name')
-                    ->required()
-                    ->label('From Budget'),
-
                 Forms\Components\Select::make('category_id')
-                    ->relationship('category', 'name')
+                    ->relationship(
+                        name: 'category',
+                        titleAttribute: 'name',
+                        modifyQueryUsing: fn($query) => $query->select('id', 'name', 'type')
+                    )
+                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->name} ({$record->type})")
                     ->required()
+                    ->searchable()
+                    ->preload()
+                    ->reactive()
                     ->label('Category'),
-
-                Forms\Components\Select::make('type')
-                    ->options([
-                        'active' => 'Active',
-                        'inactive' => 'Inactive',
-                        'finish' => 'Finish',
-                    ])
-                    ->default('active')
-                    ->required(),
 
                 Forms\Components\TextInput::make('description')
                     ->required()
@@ -61,7 +56,16 @@ class TransactionResource extends Resource
                     ->currency('IDR')
                     ->locale('id-ID')
                     ->default(0)
-                    ->required(),
+                    ->required()
+                    ->formatStateUsing(function ($state) {
+                        // Jika null atau kosong, set ke 0.00
+                        if (is_null($state) || $state === '') {
+                            return 0.00;
+                        }
+
+                        // Jika state adalah string (misalnya "500000"), ubah ke float dengan dua angka desimal
+                        return number_format(floatval(str_replace(['.', ','], ['', '.'], $state)), 2, '.', '');
+                    }),
 
             ]);
     }
@@ -70,11 +74,28 @@ class TransactionResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('description')
+                    ->label('Details')
+                    ->color(fn($record) => $record->category->type === 'expense' ? 'danger' : 'primary'),
+
+                TextColumn::make('category.name')
+                    ->label('Category')
+                    ->color(fn($record) => $record->category->type === 'expense' ? 'danger' : 'primary'),
+
+                TextColumn::make('category.type')
+                    ->label('Type')
+                    ->color(fn($record) => $record->category->type === 'expense' ? 'danger' : 'primary'),
+
+                TextColumn::make('amount')
+                    ->label('Amount')
+                    ->money('IDR')
+                    ->color(fn($record) => $record->category->type === 'expense' ? 'danger' : 'primary'),
+
+                TextColumn::make('transaction_date')
+                    ->label('Date')
+                    ->color(fn($record) => $record->category->type === 'expense' ? 'danger' : 'primary'),
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
@@ -82,7 +103,8 @@ class TransactionResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->modifyQueryUsing(fn($query) => $query->with('category')->orderByDesc('transaction_date'));
     }
 
     public static function getRelations(): array

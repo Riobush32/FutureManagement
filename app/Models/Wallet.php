@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\User;
 use App\Models\Budget;
+use App\Models\Saving;
 use App\Models\Transaction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -23,5 +24,10 @@ class Wallet extends Model
     public function budgets(): HasMany
     {
         return $this->hasMany(Budget::class);
+    }
+
+    public function savings(): HasMany
+    {
+        return $this->hasMany(Saving::class);
     }
 }
